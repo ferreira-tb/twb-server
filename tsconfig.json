@@ -1,7 +1,7 @@
 {
     "compilerOptions": {
         "outDir": "./dist",
-        "lib": ["es2022"],
+        "lib": ["es2022", "DOM"],
         "target": "es2022",
         "noEmitOnError": true,
         "module": "CommonJS",
