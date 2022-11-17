@@ -1,5 +1,10 @@
 node_modules
 dist
 
+**/database.sqlite
+**/database.sqlite-journal
+**/config.json
+**/teste.json
+
 # Editor directories and files
 .vscode

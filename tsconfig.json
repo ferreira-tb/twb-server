@@ -4,8 +4,9 @@
         "lib": ["es2022", "DOM"],
         "target": "es2022",
         "noEmitOnError": true,
-        "module": "CommonJS",
+        "module": "esnext",
         "moduleResolution": "node",
+        "resolveJsonModule": true,
 
         // Modo estrito
         "alwaysStrict": true,
@@ -27,10 +28,13 @@
         "noImplicitReturns": true,
 
         // Outros
-        "exactOptionalPropertyTypes": true,
+        // Trocar exactOptionalPropertyTypes para true quando atualizar o Sequelize para v7.
+        "exactOptionalPropertyTypes": false,
         "noFallthroughCasesInSwitch": true,
         "forceConsistentCasingInFileNames": true,
-        "removeComments": true
+        "removeComments": true,
+
+        "allowSyntheticDefaultImports": true
         
     },
 
