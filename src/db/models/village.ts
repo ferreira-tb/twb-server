@@ -30,10 +30,10 @@ export class VillageModel extends Model<InferAttributes<VillageModel>, InferCrea
     declare readonly rank: number;
 
     private static async *fetchVillageData() {
-        /*const worldURL: WorldURL = `https://br${world}.tribalwars.com.br/`;
-        const villageDataURL: WorldDataURL = `${worldURL}map/village.txt`;*/
+        const worldURL: WorldURL = 'https://br116.tribalwars.com.br/';
+        const villageDataURL: WorldDataURL = `${worldURL}map/village.txt`;
 
-        const villageData = await fetch('http://127.0.0.1:3000/api/files/village');
+        const villageData = await fetch(villageDataURL);
         const rawText = await villageData.text();
 
         const villages = rawText.split(/\r?\n/);
@@ -45,6 +45,7 @@ export class VillageModel extends Model<InferAttributes<VillageModel>, InferCrea
     public static async updateDatabase() {
         for await (const rawData of this.fetchVillageData()) {
             // Ignora a aldeia caso haja algum dado inválido.
+            if (rawData.length !== 7) continue
             if (rawData.some(item => !item)) continue;
             
             const village = new Village(rawData);
