@@ -2,25 +2,13 @@ import express from 'express';
 import * as fs from 'node:fs/promises';
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT ?? 3000;
 
-const response = () => {
-    let count = 0;
-    return function(request: express.Request, response: express.Response) {
-        if (!request) return;
-        response.json({ message: `Olá, mundo! ${String(++count)}` });
-    };
-};
+app.get('/api', (_request, response) => response.send('Conectado!'));
 
-app.get('/api', response());
-
-app.get('/api/village', async (request: express.Request, response: express.Response) => {
-    if (!request) return;
-
+app.get('/api/files/village', async (_request, response) => {
     const village = await fs.readFile('dist/village.txt', { encoding: 'utf-8' });
     response.send(village);
 });
 
-app.listen(port, () => {
-    console.log(`App listening on port ${port}`);
-});
+app.listen(port, () => console.log(`Conectado à porta ${port}`));

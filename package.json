@@ -9,9 +9,9 @@
         "sqlite3": "^5.1.2"
     },
     "scripts": {
-        "start": "npm run config && node dist/src/index.js",
-        "config": "tsc && node dist/src/config.js",
-        "db": "tsc && node dist/src/db/db.js"
+        "start": "tsc && node dist/index.js",
+        "db": "tsc && node dist/db/db.js",
+        "db-init": "tsc && node dist/db/init.js"
     },
     
     "devDependencies": {

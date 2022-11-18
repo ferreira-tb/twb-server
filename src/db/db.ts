@@ -1,4 +1,6 @@
 import { Sequelize } from 'sequelize';
+import { VillageModel } from './models/village.js';
+import * as attributes from './attributes.js';
 
 export const sequelize = new Sequelize({
     dialect: 'sqlite',
@@ -6,8 +8,10 @@ export const sequelize = new Sequelize({
     logging: false
 });
 
-const dbList = ['./models/village.js'];
+VillageModel.init(attributes.village, {
+    sequelize,
+    tableName: 'villages_116'
+});
 
-Promise.all(dbList.map(db => import(db)))
-    .then(() => sequelize.sync({ alter: true }))
-    .catch((err) => console.log(err));
+await sequelize.sync();
+await VillageModel.updateDatabase();

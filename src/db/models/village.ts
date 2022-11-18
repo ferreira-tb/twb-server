@@ -1,6 +1,4 @@
-import { DataTypes } from 'sequelize';
-import { sequelize } from '../db.js';
-import config from '../../../config.json' assert { type: 'json' };
+import { Model, InferAttributes, InferCreationAttributes } from 'sequelize';
 
 class Village {
     readonly id: number;
@@ -9,7 +7,7 @@ class Village {
     readonly y: number;
     readonly player: number;
     readonly points: number;
-    readonly type: number;
+    readonly rank: number;
 
     constructor(data: string[]) {
         this.id = Number.parseInt(data[0], 10);
@@ -18,96 +16,47 @@ class Village {
         this.y = Number.parseInt(data[3], 10);
         this.player = Number.parseInt(data[4], 10);
         this.points = Number.parseInt(data[5], 10);
-        this.type = Number.parseInt(data[6], 10)
+        this.rank = Number.parseInt(data[6], 10)
     };
 };
 
-class VillageModels {
-    [index: string]: any;
-
-    constructor() {
-        config.worlds.forEach((world) => {
-            this[world] = VillageModels.defineModel(world);
-        });
-    };
+export class VillageModel extends Model<InferAttributes<VillageModel>, InferCreationAttributes<VillageModel>> {
+    declare readonly id: number;
+    declare readonly name: string;
+    declare readonly x: number;
+    declare readonly y: number;
+    declare readonly player: number;
+    declare readonly points: number;
+    declare readonly rank: number;
 
     private static async *fetchVillageData() {
         /*const worldURL: WorldURL = `https://br${world}.tribalwars.com.br/`;
         const villageDataURL: WorldDataURL = `${worldURL}map/village.txt`;*/
 
-        try {
-            const villageData = await fetch('http://127.0.0.1:3000/api/village');
-            const rawText = await villageData.text();
+        const villageData = await fetch('http://127.0.0.1:3000/api/files/village');
+        const rawText = await villageData.text();
 
-            const villages = rawText.split(/\r?\n/);
-            for (const village of villages) {
-                yield village.split(',');;
-            };
-
-        } catch (err) {
-            console.log(err);
-            throw err;
+        const villages = rawText.split(/\r?\n/);
+        for (const village of villages) {
+            yield village.split(',');
         };
     };
 
-    public static async updateDatabase(world: string) {
+    public static async updateDatabase() {
         for await (const rawData of this.fetchVillageData()) {
-            await new Promise<void>((resolve, reject) => {
-                // Ignora a aldeia caso haja algum dado inválido.
-                if (rawData.some(item => !item)) return resolve();
-
-                if (!models[world]) return reject(new ReferenceError(`Não existe modelo para o mundo ${world}.`));
-                models[world].create(new Village(rawData))
-                    .then(() => resolve())
-                    .catch((err: unknown) => reject(err));
+            // Ignora a aldeia caso haja algum dado inválido.
+            if (rawData.some(item => !item)) continue;
+            
+            const village = new Village(rawData);
+            const [villageQuery, created] = await this.findOrCreate({
+                where: { id: village.id },
+                defaults: village
             });
-        };
-    };
 
-    public static defineModel(world: string) {
-        const validate = { isInt: true };
-        return sequelize.define(`villages_${world}`, {
-            id: {
-                type: DataTypes.INTEGER,
-                allowNull: false,
-                unique: true,
-                primaryKey: true,
-                validate
-            },
-            name: {
-                type: DataTypes.STRING,
-                allowNull: false
-            },
-            x: {
-                type: DataTypes.INTEGER,
-                allowNull: false,
-                validate
-            },
-            y: {
-                type: DataTypes.INTEGER,
-                allowNull: false,
-                validate
-            },
-            player: {
-                type: DataTypes.INTEGER,
-                allowNull: false,
-                validate
-            },
-            points: {
-                type: DataTypes.INTEGER,
-                allowNull: false,
-                validate
-            },
-            type: {
-                type: DataTypes.INTEGER,
-                allowNull: false,
-                validate
-            }
-        }, {
-            freezeTableName: true
-        });
+            if (created === false) {
+                villageQuery.set(village);
+                await villageQuery.save();
+            };
+        };
     };
 };
-
-const models = new VillageModels();
-VillageModels.updateDatabase('115');
