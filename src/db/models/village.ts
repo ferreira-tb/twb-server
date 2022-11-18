@@ -1,4 +1,5 @@
 import { Model, InferAttributes, InferCreationAttributes } from 'sequelize';
+import { sequelize } from '../db.js';
 
 class Village {
     readonly id: number;
@@ -43,21 +44,32 @@ export class VillageModel extends Model<InferAttributes<VillageModel>, InferCrea
     };
 
     public static async updateDatabase() {
+        const newVillages: Village[] = [];
         for await (const rawData of this.fetchVillageData()) {
             // Ignora a aldeia caso haja algum dado inválido.
             if (rawData.length !== 7) continue
             if (rawData.some(item => !item)) continue;
             
             const village = new Village(rawData);
-            const [villageQuery, created] = await this.findOrCreate({
-                where: { id: village.id },
-                defaults: village
-            });
+            const villageQuery = await this.findOne({ where: { id: village.id } });
 
-            if (created === false) {
+            if (villageQuery === null) {
+                newVillages.push(village);
+            } else {
                 villageQuery.set(village);
                 await villageQuery.save();
             };
+        };
+
+        if (newVillages.length > 0) {
+            const transaction = await sequelize.transaction();
+            try {
+                await this.bulkCreate(newVillages, { transaction: transaction });
+                await transaction.commit();
+            } catch (err) {
+                transaction.rollback();
+                if (err instanceof Error) throw err;
+            };  
         };
     };
 };
