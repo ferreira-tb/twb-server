@@ -30,27 +30,20 @@ export class PlayerModel extends Model<InferAttributes<PlayerModel>, InferCreati
     declare readonly rank: number;
 
     public static async updateDatabase() {
-        const newPlayers: Player[] = [];
+        const players: Player[] = [];
         for await (const rawData of fetchData('player')) {
             // Ignora a aldeia caso haja algum dado inválido.
             if (rawData.length !== 6) continue;
             if (rawData.some(item => !item)) continue;
             
-            const player = new Player(rawData);
-            const playerQuery = await this.findOne({ where: { id: player.id } });
-
-            if (playerQuery === null) {
-                newPlayers.push(player);
-            } else {
-                playerQuery.set(player);
-                await playerQuery.save();
-            };
+            players.push(new Player(rawData));
         };
 
-        if (newPlayers.length > 0) {
+        if (players.length > 0) {
             const transaction = await sequelize.transaction();
             try {
-                await this.bulkCreate(newPlayers, { transaction: transaction });
+                const keys = Object.keys(players[0]) as (keyof Player)[];
+                await this.bulkCreate(players, { updateOnDuplicate: keys , transaction: transaction });
                 await transaction.commit();
             } catch (err) {
                 transaction.rollback();
@@ -58,6 +51,7 @@ export class PlayerModel extends Model<InferAttributes<PlayerModel>, InferCreati
             };  
         };
 
-        console.log(`MUNDO 116: Jogadores atualizados.`);
+        const date = new Date().toLocaleTimeString('pt-br');
+        console.log(`${date} - MUNDO 116: Jogadores atualizados (${players.length}).`);
     };
 };

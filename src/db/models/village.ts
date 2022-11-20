@@ -33,27 +33,20 @@ export class VillageModel extends Model<InferAttributes<VillageModel>, InferCrea
     declare readonly type: number;
 
     public static async updateDatabase() {
-        const newVillages: Village[] = [];
+        const villages: Village[] = [];
         for await (const rawData of fetchData('village')) {
             // Ignora a aldeia caso haja algum dado inválido.
             if (rawData.length !== 7) continue;
             if (rawData.some(item => !item)) continue;
             
-            const village = new Village(rawData);
-            const villageQuery = await this.findOne({ where: { id: village.id } });
-
-            if (villageQuery === null) {
-                newVillages.push(village);
-            } else {
-                villageQuery.set(village);
-                await villageQuery.save();
-            };
+            villages.push(new Village(rawData));
         };
 
-        if (newVillages.length > 0) {
+        if (villages.length > 0) {
             const transaction = await sequelize.transaction();
             try {
-                await this.bulkCreate(newVillages, { transaction: transaction });
+                const keys = Object.keys(villages[0]) as (keyof Village)[];
+                await this.bulkCreate(villages, { updateOnDuplicate: keys, transaction: transaction });
                 await transaction.commit();
             } catch (err) {
                 transaction.rollback();
@@ -61,6 +54,7 @@ export class VillageModel extends Model<InferAttributes<VillageModel>, InferCrea
             };  
         };
 
-        console.log(`MUNDO 116: Aldeias atualizadas.`);
+        const date = new Date().toLocaleTimeString('pt-br');
+        console.log(`${date} - MUNDO 116: Aldeias atualizadas (${villages.length}).`);
     };
 };

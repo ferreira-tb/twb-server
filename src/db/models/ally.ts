@@ -36,27 +36,20 @@ export class AllyModel extends Model<InferAttributes<AllyModel>, InferCreationAt
     declare readonly rank: number;
 
     public static async updateDatabase() {
-        const newAllies: Ally[] = [];
+        const allies: Ally[] = [];
         for await (const rawData of fetchData('ally')) {
             // Ignora a aldeia caso haja algum dado inválido.
             if (rawData.length !== 8) continue;
             if (rawData.some(item => !item)) continue;
             
-            const ally = new Ally(rawData);
-            const allyQuery = await this.findOne({ where: { id: ally.id } });
-
-            if (allyQuery === null) {
-                newAllies.push(ally);
-            } else {
-                allyQuery.set(ally);
-                await allyQuery.save();
-            };
+            allies.push(new Ally(rawData));
         };
 
-        if (newAllies.length > 0) {
+        if (allies.length > 0) {
             const transaction = await sequelize.transaction();
             try {
-                await this.bulkCreate(newAllies, { transaction: transaction });
+                const keys = Object.keys(allies[0]) as (keyof Ally)[];
+                await this.bulkCreate(allies, { updateOnDuplicate: keys, transaction: transaction });
                 await transaction.commit();
             } catch (err) {
                 transaction.rollback();
@@ -64,6 +57,7 @@ export class AllyModel extends Model<InferAttributes<AllyModel>, InferCreationAt
             };  
         };
 
-        console.log(`MUNDO 116: Tribos atualizadas.`);
+        const date = new Date().toLocaleTimeString('pt-br');
+        console.log(`${date} - MUNDO 116: Tribos atualizadas (${allies.length}).`);
     };
 };

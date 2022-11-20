@@ -24,27 +24,21 @@ export class ConquerModel extends Model<InferAttributes<ConquerModel>, InferCrea
     declare readonly old_owner: number;
 
     public static async updateDatabase() {
-        const newConquers: Conquer[] = [];
+        const conquers: Conquer[] = [];
         for await (const rawData of fetchData('conquer')) {
             // Ignora a aldeia caso haja algum dado inválido.
             if (rawData.length !== 4) continue;
             if (rawData.some(item => !item)) continue;
             
             const conquer = new Conquer(rawData);
-            const conquerQuery = await this.findOne({ where: {
-                village_id: conquer.village_id,
-                time: conquer.time,
-                new_owner: conquer.new_owner,
-                old_owner: conquer.old_owner
-            }});
-
-            if (conquerQuery === null) newConquers.push(conquer);
+            const conquerQuery = await this.findOne({ where: { ...conquer }});
+            if (conquerQuery === null) conquers.push(conquer);
         };
 
-        if (newConquers.length > 0) {
+        if (conquers.length > 0) {
             const transaction = await sequelize.transaction();
             try {
-                await this.bulkCreate(newConquers, { transaction: transaction });
+                await this.bulkCreate(conquers, { transaction: transaction });
                 await transaction.commit();
             } catch (err) {
                 transaction.rollback();
@@ -52,6 +46,7 @@ export class ConquerModel extends Model<InferAttributes<ConquerModel>, InferCrea
             };  
         };
 
-        console.log(`MUNDO 116: Conquistas atualizadas.`);
+        const date = new Date().toLocaleTimeString('pt-br');
+        console.log(`${date} - MUNDO 116: Conquistas atualizadas (${conquers.length}).`);
     };
 };
