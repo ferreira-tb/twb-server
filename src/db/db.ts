@@ -31,15 +31,16 @@ export async function start() {
         sequelize: sequelize,
         tableName: 'villages_116'
     });
-    
+
     await sequelize.sync();
     updateAllDatabases();
 };
 
+// A ordem é importante e não deve ser alterada.
 function updateAllDatabases() {
-    VillageModel.updateDatabase()
+    AllyModel.updateDatabase()
         .then(() => PlayerModel.updateDatabase())
-        .then(() => AllyModel.updateDatabase())
+        .then(() => VillageModel.updateDatabase())
         .then(() => ConquerModel.updateDatabase())
         .then(() => setTimeout(() => updateAllDatabases(), 3600000 * 1.2))
         .catch((err) => console.log(err));
