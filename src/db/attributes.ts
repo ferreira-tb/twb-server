@@ -60,6 +60,18 @@ export const conquer = {
     old_owner: {
         type: DataTypes.INTEGER,
         allowNull: false
+    },
+    old_tribe_id: {
+        type: DataTypes.INTEGER,
+        allowNull: false
+    },
+    new_tribe_id: {
+        type: DataTypes.INTEGER,
+        allowNull: false
+    },
+    points: {
+        type: DataTypes.INTEGER,
+        allowNull: false
     }
 };
 

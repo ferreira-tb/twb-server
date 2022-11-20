@@ -1,6 +1,6 @@
 type WorldURL = `https://br${string}.tribalwars.com.br/`;
 
-type WorldDataType = 'village' | 'ally' | 'player' | 'conquer';
+type WorldDataType = 'village' | 'ally' | 'player' | 'conquer' | 'conquer_extended';
 
 type WorldKillType =
     | 'kill_att'
@@ -15,10 +15,11 @@ type AllWorldFileTypes = WorldDataType | WorldKillType;
 
 type WorldDataURL = `${WorldURL}map/${AllWorldFileTypes}.txt`;
 
-type WorldFunctions =
-    | 'interface.php?func=get_conquer&since=unix_timestamp'
+type WorldInterface =
+    | `interface.php?func=get_conquer&since=${string}`
+    | `interface.php?func=conquer_extended&since=${string}`
     | 'interface.php?func=get_config'
     | 'interface.php?func=get_unit_info'
     | 'interface.php?func=get_building_info';
 
-type WorldFunctionsURL = `${WorldURL}${WorldFunctions}`;
+type WorldInterfaceURL = `${WorldURL}${WorldInterface}`;

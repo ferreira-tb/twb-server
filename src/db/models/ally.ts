@@ -38,7 +38,6 @@ export class AllyModel extends Model<InferAttributes<AllyModel>, InferCreationAt
     public static async updateDatabase() {
         const allies: Ally[] = [];
         for await (const rawData of fetchData('ally')) {
-            // Ignora a aldeia caso haja algum dado inválido.
             if (rawData.length !== 8) continue;
             if (rawData.some(item => !item)) continue;
             

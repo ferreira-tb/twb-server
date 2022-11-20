@@ -32,7 +32,6 @@ export class PlayerModel extends Model<InferAttributes<PlayerModel>, InferCreati
     public static async updateDatabase() {
         const players: Player[] = [];
         for await (const rawData of fetchData('player')) {
-            // Ignora a aldeia caso haja algum dado inválido.
             if (rawData.length !== 6) continue;
             if (rawData.some(item => !item)) continue;
             

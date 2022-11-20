@@ -35,7 +35,6 @@ export class VillageModel extends Model<InferAttributes<VillageModel>, InferCrea
     public static async updateDatabase() {
         const villages: Village[] = [];
         for await (const rawData of fetchData('village')) {
-            // Ignora a aldeia caso haja algum dado inválido.
             if (rawData.length !== 7) continue;
             if (rawData.some(item => !item)) continue;
             
