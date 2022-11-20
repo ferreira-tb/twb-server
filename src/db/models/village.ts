@@ -1,5 +1,7 @@
-import { Model, InferAttributes, InferCreationAttributes } from 'sequelize';
-import { sequelize } from '../db.js';
+import { Model } from 'sequelize';
+import { sequelize, fetchData } from '../db.js';
+
+import type { InferAttributes, InferCreationAttributes } from 'sequelize';
 
 class Village {
     readonly id: number;
@@ -8,7 +10,7 @@ class Village {
     readonly y: number;
     readonly player: number;
     readonly points: number;
-    readonly rank: number;
+    readonly type: number;
 
     constructor(data: string[]) {
         this.id = Number.parseInt(data[0], 10);
@@ -17,7 +19,7 @@ class Village {
         this.y = Number.parseInt(data[3], 10);
         this.player = Number.parseInt(data[4], 10);
         this.points = Number.parseInt(data[5], 10);
-        this.rank = Number.parseInt(data[6], 10)
+        this.type = Number.parseInt(data[6], 10);
     };
 };
 
@@ -28,26 +30,13 @@ export class VillageModel extends Model<InferAttributes<VillageModel>, InferCrea
     declare readonly y: number;
     declare readonly player: number;
     declare readonly points: number;
-    declare readonly rank: number;
-
-    private static async *fetchVillageData() {
-        const worldURL: WorldURL = 'https://br116.tribalwars.com.br/';
-        const villageDataURL: WorldDataURL = `${worldURL}map/village.txt`;
-
-        const villageData = await fetch(villageDataURL);
-        const rawText = await villageData.text();
-
-        const villages = rawText.split(/\r?\n/);
-        for (const village of villages) {
-            yield village.split(',');
-        };
-    };
+    declare readonly type: number;
 
     public static async updateDatabase() {
         const newVillages: Village[] = [];
-        for await (const rawData of this.fetchVillageData()) {
+        for await (const rawData of fetchData('village')) {
             // Ignora a aldeia caso haja algum dado inválido.
-            if (rawData.length !== 7) continue
+            if (rawData.length !== 7) continue;
             if (rawData.some(item => !item)) continue;
             
             const village = new Village(rawData);
@@ -71,5 +60,7 @@ export class VillageModel extends Model<InferAttributes<VillageModel>, InferCrea
                 if (err instanceof Error) throw err;
             };  
         };
+
+        console.log(`MUNDO 116: Aldeias atualizadas.`);
     };
 };

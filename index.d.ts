@@ -11,7 +11,9 @@ type WorldKillType =
     | 'kill_def_tribe'
     | 'kill_all_tribe';
 
-type WorldDataURL = `${WorldURL}map/${WorldDataType | WorldKillType}.txt`;
+type AllWorldFileTypes = WorldDataType | WorldKillType;
+
+type WorldDataURL = `${WorldURL}map/${AllWorldFileTypes}.txt`;
 
 type WorldFunctions =
     | 'interface.php?func=get_conquer&since=unix_timestamp'
