@@ -17,7 +17,7 @@ type WorldDataURL = `${WorldURL}map/${AllWorldFileTypes}.txt`;
 
 type WorldInterface =
     | `interface.php?func=get_conquer&since=${string}`
-    | `interface.php?func=conquer_extended&since=${string}`
+    | `interface.php?func=get_conquer_extended&since=${string}`
     | 'interface.php?func=get_config'
     | 'interface.php?func=get_unit_info'
     | 'interface.php?func=get_building_info';
