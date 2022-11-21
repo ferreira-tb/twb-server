@@ -5,6 +5,8 @@ import { ConquerModel } from './models/conquer.js';
 import { PlayerModel } from './models/player.js';
 import { VillageModel } from './models/village.js';
 
+import type { AllWorldFileTypes, WorldURL, WorldDataURL } from '../../index';
+
 export const sequelize = new Sequelize({
     dialect: 'sqlite',
     storage: 'database.sqlite',

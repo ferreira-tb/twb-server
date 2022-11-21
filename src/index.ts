@@ -8,7 +8,7 @@ app.get('/api', (_request, response) => response.send('Conectado!'));
 
 app.get('/api/interface/get_conquer', async (_request, response) => {
     const { getConquer } = await import('./interface/get_conquer.js');
-    const conquests = await getConquer('116', 60);
+    const conquests = await getConquer('116', 60 * 20);
     response.send(conquests);
 });
 
