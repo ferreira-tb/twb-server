@@ -1,5 +1,5 @@
 import express from 'express';
-// import * as database from './db/db.js';
+import * as database from './db/db.js';
 
 const app = express();
 const port = process.env.PORT ?? 3000;
@@ -14,4 +14,4 @@ app.get('/api/interface/get_conquer', async (_request, response) => {
 
 app.listen(port, () => console.log(`Conectado à porta ${port}.`));
 
-// database.start();
+database.start();
