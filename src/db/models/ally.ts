@@ -7,8 +7,8 @@ class Ally {
     readonly ally_id: number;
     readonly name: string;
     readonly tag: string;
-    readonly members: number;
-    readonly villages: number;
+    readonly member_amount: number;
+    readonly village_amount: number;
     readonly points: number;
     readonly all_points: number;
     readonly rank: number;
@@ -17,8 +17,8 @@ class Ally {
         this.ally_id = Number.parseInt(data[0], 10);
         this.name = decodeURIComponent(data[1].replace(/\+/g, ' '));
         this.tag = decodeURIComponent(data[2].replace(/\+/g, ' '));
-        this.members = Number.parseInt(data[3], 10);
-        this.villages = Number.parseInt(data[4], 10);
+        this.member_amount = Number.parseInt(data[3], 10);
+        this.village_amount = Number.parseInt(data[4], 10);
         this.points = Number.parseInt(data[5], 10);
         this.all_points = Number.parseInt(data[6], 10);
         this.rank = Number.parseInt(data[7], 10);
@@ -31,8 +31,8 @@ export declare class AllyModel extends Model {
     readonly ally_id: number;
     readonly name: string;
     readonly tag: string;
-    readonly members: number;
-    readonly villages: number;
+    readonly member_amount: number;
+    readonly village_amount: number;
     readonly points: number;
     readonly all_points: number;
     readonly rank: number;

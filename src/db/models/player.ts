@@ -2,12 +2,13 @@ import { Model } from 'sequelize';
 import { sequelize, fetchData } from '../db.js';
 
 import type { InferAttributes, InferCreationAttributes } from 'sequelize';
+import type { AllyModel } from './ally';
 
 class Player {
     readonly player_id: number;
     readonly name: string;
     readonly ally_id: number;
-    readonly villages: number;
+    readonly village_amount: number;
     readonly points: number;
     readonly rank: number;
 
@@ -15,7 +16,7 @@ class Player {
         this.player_id = Number.parseInt(data[0], 10);
         this.name = decodeURIComponent(data[1].replace(/\+/g, ' '));
         this.ally_id = Number.parseInt(data[2], 10);
-        this.villages = Number.parseInt(data[3], 10);
+        this.village_amount = Number.parseInt(data[3], 10);
         this.points = Number.parseInt(data[4], 10);
         this.rank = Number.parseInt(data[5], 10);
     };
@@ -27,7 +28,7 @@ export declare class PlayerModel extends Model {
     readonly player_id: number;
     readonly name: string;
     readonly ally_id: number;
-    readonly villages: number;
+    readonly village_amount: number;
     readonly points: number;
     readonly rank: number;
 };
@@ -61,8 +62,24 @@ export function createPlayerTable(world: string) {
     };
 };
 
-export class PlayerInfo {
+class PlayerInfo {
+    readonly player_name: string;
+    readonly ally_name: string | null;
+    readonly ally_tag: string | null;
+    readonly village_amount: number;
+    readonly points: number;
+    readonly mean_points: number;
+    readonly rank: number;
 
+    constructor(player: PlayerModel, ally: AllyModel | null) {
+        this.player_name = player.name;
+        this.ally_name = ally?.name ?? null;
+        this.ally_tag = ally?.tag ?? null;
+        this.village_amount = player.village_amount;
+        this.points = player.points;
+        this.mean_points = Math.round(this.points / this.village_amount);
+        this.rank = player.rank;
+    };
 };
 
 export async function getPlayerInfo(world: string, id: string) {
@@ -73,5 +90,17 @@ export async function getPlayerInfo(world: string, id: string) {
     const parsedID = Number.parseInt(id, 10);
     if (Number.isNaN(parsedID)) return null;
 
-    return await PlayerTable.findByPk(parsedID);
+    const player = await PlayerTable.findByPk(parsedID);
+    if (!player) return null;
+
+    const AllyTable = tables.map.get(`ally_${world}`) as typeof AllyModel | undefined;
+    const getAlly = async () => {
+        if (!AllyTable || player.ally_id === 0) return null;
+        const ally = await AllyTable.findByPk(player.ally_id);
+        if (!ally) return null;
+
+        return ally;
+    };
+
+    return new PlayerInfo(player, await getAlly());
 };

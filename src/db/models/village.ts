@@ -2,13 +2,14 @@ import { Model } from 'sequelize';
 import { sequelize, fetchData } from '../db.js';
 
 import type { InferAttributes, InferCreationAttributes } from 'sequelize';
+import type { PlayerModel } from './player';
 
 class Village {
     readonly village_id: number;
     readonly name: string;
     readonly x: number;
     readonly y: number;
-    readonly player: number;
+    readonly player_id: number;
     readonly points: number;
     readonly type: number;
 
@@ -17,7 +18,7 @@ class Village {
         this.name = decodeURIComponent(data[1].replace(/\+/g, ' '));
         this.x = Number.parseInt(data[2], 10);
         this.y = Number.parseInt(data[3], 10);
-        this.player = Number.parseInt(data[4], 10);
+        this.player_id = Number.parseInt(data[4], 10);
         this.points = Number.parseInt(data[5], 10);
         this.type = Number.parseInt(data[6], 10);
     };
@@ -30,7 +31,7 @@ export declare class VillageModel extends Model {
     readonly name: string;
     readonly x: number;
     readonly y: number;
-    readonly player: number;
+    readonly player_id: number;
     readonly points: number;
     readonly type: number;
 };
@@ -62,4 +63,45 @@ export function createVillageTable(world: string) {
             console.log(`${date} - MUNDO ${world}: Aldeias atualizadas (${villages.length}).`);
         };
     };
+};
+
+class ExtendedVillage implements Village {
+    readonly village_id: number;
+    readonly name: string;
+    readonly x: number;
+    readonly y: number;
+    readonly player_id: number;
+    readonly player_name: string;
+    readonly points: number;
+    readonly type: number;
+
+    constructor(village: VillageModel, player_name: string) {
+        this.village_id = village.village_id;
+        this.name = village.name;
+        this.x = village.x;
+        this.y = village.y;
+        this.player_id = village.player_id;
+        this.player_name = player_name;
+        this.points = village.points;
+        this.type = village.type;
+    };
+};
+
+export async function getPlayerVillages(world: string, id: string) {
+    const { tables } = await import('../db.js');
+    const VillageTable = tables.map.get(`village_${world}`) as typeof VillageModel | undefined;
+    const PlayerTable = tables.map.get(`player_${world}`) as typeof PlayerModel | undefined;
+    if (!VillageTable || !PlayerTable ) return null;
+
+    const parsedID = Number.parseInt(id, 10);
+    if (Number.isNaN(parsedID)) return null;
+
+    const player = await PlayerTable.findByPk(parsedID);
+    if (!player) return null;
+
+    const villages = await VillageTable.findAll({ where: { player_id: parsedID } });
+    const extendedVillages = villages.map((village) => new ExtendedVillage(village, player.name));
+    extendedVillages.sort((a, b) => a.name.localeCompare(b.name, 'pt-br'));
+
+    return extendedVillages;
 };

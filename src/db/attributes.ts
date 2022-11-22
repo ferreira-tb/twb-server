@@ -15,11 +15,11 @@ export const ally = {
         type: DataTypes.STRING,
         allowNull: false
     },
-    members: {
+    member_amount: {
         type: DataTypes.INTEGER,
         allowNull: false
     },
-    villages: {
+    village_amount: {
         type: DataTypes.INTEGER,
         allowNull: false,
         defaultValue: 0
@@ -97,7 +97,7 @@ export const player = {
         allowNull: false,
         defaultValue: 0
     },
-    villages: {
+    village_amount: {
         type: DataTypes.INTEGER,
         allowNull: false,
         defaultValue: 0
