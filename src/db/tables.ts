@@ -46,6 +46,7 @@ export async function initTables() {
             tableName: `village_${world}`
         });
         
+        // Salva as classes no mapa.
         tableMap.set(`ally_${world}`, AllyTable);
         tableMap.set(`conquer_${world}`, ConquerTable);
         tableMap.set(`player_${world}`, PlayerTable);

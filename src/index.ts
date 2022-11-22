@@ -18,11 +18,14 @@ app.get('/api/interface/:world/get_conquer', async (request, response) => {
 });
 
 // Banco de dados.
-/*app.get('/api/query/:world/player/:id((\\d+))', async (request, response) => {
-    const world = request.params.world;
+app.get('/api/query/:world/player/:id((\\d+))', async (request, response) => {
+    const { id, world } = request.params;
     if (!config.worlds.includes(world)) return;
 
-});*/
+    const { getPlayerInfo } = await import('./db/models/player.js');
+    const player = await getPlayerInfo(world, id);
+    response.send(player);
+});
 
 app.listen(port, () => console.log(`Conectado à porta ${port}.`));
 

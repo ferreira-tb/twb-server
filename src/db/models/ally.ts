@@ -4,7 +4,7 @@ import { sequelize, fetchData } from '../db.js';
 import type { InferAttributes, InferCreationAttributes } from 'sequelize';
 
 class Ally {
-    readonly id: number;
+    readonly ally_id: number;
     readonly name: string;
     readonly tag: string;
     readonly members: number;
@@ -14,7 +14,7 @@ class Ally {
     readonly rank: number;
 
     constructor(data: string[]) {
-        this.id = Number.parseInt(data[0], 10);
+        this.ally_id = Number.parseInt(data[0], 10);
         this.name = decodeURIComponent(data[1].replace(/\+/g, ' '));
         this.tag = decodeURIComponent(data[2].replace(/\+/g, ' '));
         this.members = Number.parseInt(data[3], 10);
@@ -28,7 +28,7 @@ class Ally {
 export declare class AllyModel extends Model {
     static updateDatabase(): Promise<void>
 
-    readonly id: number;
+    readonly ally_id: number;
     readonly name: string;
     readonly tag: string;
     readonly members: number;

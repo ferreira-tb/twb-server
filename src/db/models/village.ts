@@ -4,7 +4,7 @@ import { sequelize, fetchData } from '../db.js';
 import type { InferAttributes, InferCreationAttributes } from 'sequelize';
 
 class Village {
-    readonly id: number;
+    readonly village_id: number;
     readonly name: string;
     readonly x: number;
     readonly y: number;
@@ -13,7 +13,7 @@ class Village {
     readonly type: number;
 
     constructor(data: string[]) {
-        this.id = Number.parseInt(data[0], 10);
+        this.village_id = Number.parseInt(data[0], 10);
         this.name = decodeURIComponent(data[1].replace(/\+/g, ' '));
         this.x = Number.parseInt(data[2], 10);
         this.y = Number.parseInt(data[3], 10);
@@ -26,7 +26,7 @@ class Village {
 export declare class VillageModel extends Model {
     static updateDatabase(): Promise<void>
 
-    readonly id: number;
+    readonly village_id: number;
     readonly name: string;
     readonly x: number;
     readonly y: number;

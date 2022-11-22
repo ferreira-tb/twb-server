@@ -31,6 +31,8 @@ function updateWorldDatabase(world: string) {
             .then(() => resolve())
             .then(() => setTimeout(() => updateWorldDatabase(world), 3600000 * 1.2))
             .catch((err: unknown) => reject(err));
+        
+        if (!AllyTable) resolve();
     });
 };
 

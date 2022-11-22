@@ -1,7 +1,7 @@
 import { DataTypes } from "sequelize"
 
 export const ally = {
-    id: {
+    ally_id: {
         type: DataTypes.INTEGER,
         allowNull: false,
         unique: true,
@@ -21,21 +21,24 @@ export const ally = {
     },
     villages: {
         type: DataTypes.INTEGER,
-        allowNull: false
+        allowNull: false,
+        defaultValue: 0
     },
     points: {
         type: DataTypes.INTEGER,
-        allowNull: false
+        allowNull: false,
+        defaultValue: 0
     },
     all_points: {
         type: DataTypes.INTEGER,
-        allowNull: false
+        allowNull: false,
+        defaultValue: 0
     },
     rank: {
         type: DataTypes.INTEGER,
         allowNull: false
     }
-};
+} as const;
 
 export const conquer = {
     id: {
@@ -53,30 +56,33 @@ export const conquer = {
         type: DataTypes.INTEGER,
         allowNull: false
     },
-    new_owner: {
+    new_owner_id: {
         type: DataTypes.INTEGER,
         allowNull: false
     },
-    old_owner: {
+    old_owner_id: {
         type: DataTypes.INTEGER,
-        allowNull: false
-    },
-    old_tribe_id: {
-        type: DataTypes.INTEGER,
-        allowNull: false
+        allowNull: false,
+        defaultValue: 0
     },
     new_tribe_id: {
         type: DataTypes.INTEGER,
-        allowNull: false
+        allowNull: false,
+        defaultValue: 0
+    },
+    old_tribe_id: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 0
     },
     points: {
         type: DataTypes.INTEGER,
         allowNull: false
     }
-};
+} as const;
 
 export const player = {
-    id: {
+    player_id: {
         type: DataTypes.INTEGER,
         allowNull: false,
         unique: true,
@@ -86,17 +92,20 @@ export const player = {
         type: DataTypes.STRING,
         allowNull: false
     },
-    ally: {
+    ally_id: {
         type: DataTypes.INTEGER,
-        allowNull: false
+        allowNull: false,
+        defaultValue: 0
     },
     villages: {
         type: DataTypes.INTEGER,
-        allowNull: false
+        allowNull: false,
+        defaultValue: 0
     },
     points: {
         type: DataTypes.INTEGER,
-        allowNull: false
+        allowNull: false,
+        defaultValue: 0
     },
     rank: {
         type: DataTypes.INTEGER,
@@ -105,7 +114,7 @@ export const player = {
 } as const;
 
 export const village = {
-    id: {
+    village_id: {
         type: DataTypes.INTEGER,
         allowNull: false,
         unique: true,
@@ -123,9 +132,10 @@ export const village = {
         type: DataTypes.INTEGER,
         allowNull: false
     },
-    player: {
+    player_id: {
         type: DataTypes.INTEGER,
-        allowNull: false
+        allowNull: false,
+        defaultValue: 0
     },
     points: {
         type: DataTypes.INTEGER,
@@ -133,6 +143,7 @@ export const village = {
     },
     type: {
         type: DataTypes.INTEGER,
-        allowNull: false
+        allowNull: false,
+        defaultValue: 0
     }
 } as const;

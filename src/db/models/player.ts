@@ -4,17 +4,17 @@ import { sequelize, fetchData } from '../db.js';
 import type { InferAttributes, InferCreationAttributes } from 'sequelize';
 
 class Player {
-    readonly id: number;
+    readonly player_id: number;
     readonly name: string;
-    readonly ally: number;
+    readonly ally_id: number;
     readonly villages: number;
     readonly points: number;
     readonly rank: number;
 
     constructor(data: string[]) {
-        this.id = Number.parseInt(data[0], 10);
+        this.player_id = Number.parseInt(data[0], 10);
         this.name = decodeURIComponent(data[1].replace(/\+/g, ' '));
-        this.ally = Number.parseInt(data[2], 10);
+        this.ally_id = Number.parseInt(data[2], 10);
         this.villages = Number.parseInt(data[3], 10);
         this.points = Number.parseInt(data[4], 10);
         this.rank = Number.parseInt(data[5], 10);
@@ -24,9 +24,9 @@ class Player {
 export declare class PlayerModel extends Model {
     static updateDatabase(): Promise<void>
 
-    readonly id: number;
+    readonly player_id: number;
     readonly name: string;
-    readonly ally: number;
+    readonly ally_id: number;
     readonly villages: number;
     readonly points: number;
     readonly rank: number;
@@ -59,4 +59,19 @@ export function createPlayerTable(world: string) {
             console.log(`${date} - MUNDO ${world}: Jogadores atualizados (${players.length}).`);
         };
     };
+};
+
+export class PlayerInfo {
+
+};
+
+export async function getPlayerInfo(world: string, id: string) {
+    const { tables } = await import('../db.js');
+    const PlayerTable = tables.map.get(`player_${world}`) as typeof PlayerModel | undefined;
+    if (!PlayerTable) return null;
+
+    const parsedID = Number.parseInt(id, 10);
+    if (Number.isNaN(parsedID)) return null;
+
+    return await PlayerTable.findByPk(parsedID);
 };
