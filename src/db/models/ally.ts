@@ -62,7 +62,7 @@ export function createAllyTable(world: string) {
             };
     
             const date = new Date().toLocaleTimeString('pt-br');
-            console.log(`${date} - MUNDO ${world}: Tribos atualizadas (${allies.length}).`);
+            console.log(`${date} - MUNDO ${world.toUpperCase()}: Tribos atualizadas (${allies.length}).`);
         };
     };
 };

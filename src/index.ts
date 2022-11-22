@@ -7,7 +7,7 @@ const port = process.env.PORT ?? 3000;
 
 app.get('/api', (_request, response) => response.send('Conectado!'));
 
-// Interface.
+// Interface ("/api/interface/:world/").
 app.get('/api/interface/:world/get_conquer', async (request, response) => {
     const world = request.params.world;
     if (!config.worlds.includes(world)) return;
@@ -17,8 +17,8 @@ app.get('/api/interface/:world/get_conquer', async (request, response) => {
     response.send(conquests);
 });
 
-// Banco de dados.
-const playerQuery = '/api/query/:world/player/:id((\\d+))';
+// Banco de dados ("/api/query/:world/").
+const playerQuery = '/api/query/:world/player/:id(\\d+)';
 app.get(playerQuery, async (request, response) => {
     const { id, world } = request.params;
     if (!config.worlds.includes(world)) return;
@@ -35,6 +35,16 @@ app.get(`${playerQuery}/villages`, async (request, response) => {
     const { getPlayerVillages } = await import('./db/models/village.js');
     const playerVillages = await getPlayerVillages(world, id);
     response.send(playerVillages);
+});
+
+// Tribal Wars ("/api/game/:world/").
+app.get('/api/game/:world/player/:id(\\d+)/profile', async (request, response) => {
+    const { id, world } = request.params;
+    if (!config.worlds.includes(world)) return;
+
+    const { getPlayerProfilePage } = await import('./game/profile.js');
+    const targetPage = await getPlayerProfilePage(world, id);
+    response.send(targetPage);
 });
 
 app.listen(port, () => console.log(`Conectado à porta ${port}.`));

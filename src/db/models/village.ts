@@ -60,7 +60,7 @@ export function createVillageTable(world: string) {
             };
     
             const date = new Date().toLocaleTimeString('pt-br');
-            console.log(`${date} - MUNDO ${world}: Aldeias atualizadas (${villages.length}).`);
+            console.log(`${date} - MUNDO ${world.toUpperCase()}: Aldeias atualizadas (${villages.length}).`);
         };
     };
 };
@@ -70,6 +70,8 @@ class ExtendedVillage implements Village {
     readonly name: string;
     readonly x: number;
     readonly y: number;
+    readonly coords: string;
+    continent!: string;
     readonly player_id: number;
     readonly player_name: string;
     readonly points: number;
@@ -84,6 +86,15 @@ class ExtendedVillage implements Village {
         this.player_name = player_name;
         this.points = village.points;
         this.type = village.type;
+
+        const getCoords = () => {
+            const x = this.x.toString(10).padStart(3, '0');
+            const y = this.y.toString(10).padStart(3, '0');
+            this.continent = `K${y[0]}${x[0]}`;
+            return `${x}|${y}`;
+        };
+
+        this.coords = getCoords();
     };
 };
 

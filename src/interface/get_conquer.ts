@@ -5,7 +5,7 @@ import type { PlayerModel } from '../db/models/player.js';
 import type { VillageModel } from '../db/models/village.js';
 
 export async function getConquer(world: string, minutes: number = 5) {
-    if (!world) return;
+    if (!world) return null;
     const { tables } = await import('../db/db.js');
     const AllyTable = tables.map.get(`ally_${world}`) as typeof AllyModel | undefined;
     const PlayerTable = tables.map.get(`player_${world}`) as typeof PlayerModel | undefined;

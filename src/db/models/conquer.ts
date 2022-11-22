@@ -78,7 +78,7 @@ export function createConquerTable(world: string) {
             };
     
             const date = new Date().toLocaleTimeString('pt-br');
-            console.log(`${date} - MUNDO ${world}: Conquistas atualizadas (${conquests.length}).`);
+            console.log(`${date} - MUNDO ${world.toUpperCase()}: Conquistas atualizadas (${conquests.length}).`);
         };
     };
 };

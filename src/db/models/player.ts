@@ -57,7 +57,7 @@ export function createPlayerTable(world: string) {
             };
     
             const date = new Date().toLocaleTimeString('pt-br');
-            console.log(`${date} - MUNDO ${world}: Jogadores atualizados (${players.length}).`);
+            console.log(`${date} - MUNDO ${world.toUpperCase()}: Jogadores atualizados (${players.length}).`);
         };
     };
 };
