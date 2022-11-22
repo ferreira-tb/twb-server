@@ -21,36 +21,42 @@ class Player {
     };
 };
 
-export class PlayerModel extends Model<InferAttributes<PlayerModel>, InferCreationAttributes<PlayerModel>>  {
-    declare readonly id: number;
-    declare readonly name: string;
-    declare readonly ally: number;
-    declare readonly villages: number;
-    declare readonly points: number;
-    declare readonly rank: number;
+export declare class PlayerModel extends Model {
+    static updateDatabase(): Promise<void>
 
-    public static async updateDatabase() {
-        const players: Player[] = [];
-        for await (const rawData of fetchData('player')) {
-            if (rawData.length !== 6) continue;
-            if (rawData.some(item => !item)) continue;
-            
-            players.push(new Player(rawData));
+    readonly id: number;
+    readonly name: string;
+    readonly ally: number;
+    readonly villages: number;
+    readonly points: number;
+    readonly rank: number;
+};
+
+export function createPlayerTable(world: string) {
+    return class extends Model<InferAttributes<PlayerModel>, InferCreationAttributes<PlayerModel>> {
+        public static async updateDatabase() {
+            const players: Player[] = [];
+            for await (const rawData of fetchData(world, 'player')) {
+                if (rawData.length !== 6) continue;
+                if (rawData.some(item => !item)) continue;
+                
+                players.push(new Player(rawData));
+            };
+    
+            if (players.length > 0) {
+                const transaction = await sequelize.transaction();
+                try {
+                    const keys = Object.keys(players[0]) as (keyof Player)[];
+                    await this.bulkCreate(players, { updateOnDuplicate: keys , transaction: transaction });
+                    await transaction.commit();
+                } catch (err) {
+                    transaction.rollback();
+                    if (err instanceof Error) throw err;
+                };  
+            };
+    
+            const date = new Date().toLocaleTimeString('pt-br');
+            console.log(`${date} - MUNDO ${world}: Jogadores atualizados (${players.length}).`);
         };
-
-        if (players.length > 0) {
-            const transaction = await sequelize.transaction();
-            try {
-                const keys = Object.keys(players[0]) as (keyof Player)[];
-                await this.bulkCreate(players, { updateOnDuplicate: keys , transaction: transaction });
-                await transaction.commit();
-            } catch (err) {
-                transaction.rollback();
-                if (err instanceof Error) throw err;
-            };  
-        };
-
-        const date = new Date().toLocaleTimeString('pt-br');
-        console.log(`${date} - MUNDO 116: Jogadores atualizados (${players.length}).`);
     };
 };

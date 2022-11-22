@@ -1,0 +1,4 @@
+{
+    "worlds": ["115", "116"],
+    "tables": ["ally", "conquer", "player", "village"]
+}

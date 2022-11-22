@@ -1,11 +1,6 @@
+import config from '../../config.json' assert { type: 'json' };
 import { Sequelize } from 'sequelize';
-import * as attributes from './attributes.js';
-import { AllyModel } from './models/ally.js';
-import { ConquerModel } from './models/conquer.js';
-import { PlayerModel } from './models/player.js';
-import { VillageModel } from './models/village.js';
-
-import type { AllWorldFileTypes, WorldURL, WorldDataURL } from '../../index';
+import { initTables } from './tables.js';
 
 export const sequelize = new Sequelize({
     dialect: 'sqlite',
@@ -13,43 +8,34 @@ export const sequelize = new Sequelize({
     logging: false
 });
 
-export async function start() {
-    AllyModel.init(attributes.ally, {
-        sequelize: sequelize,
-        tableName: 'allies_116'
-    });
+export const tables = { map: await initTables() };
 
-    ConquerModel.init(attributes.conquer, {
-        sequelize: sequelize,
-        tableName: 'conquers_116'
-    });
-
-    PlayerModel.init(attributes.player, {
-        sequelize: sequelize,
-        tableName: 'players_116'
-    });
-
-    VillageModel.init(attributes.village, {
-        sequelize: sequelize,
-        tableName: 'villages_116'
-    });
-
-    await sequelize.sync();
-    updateAllDatabases();
+export async function updateAllDatabases() {
+    for (const world of config.worlds) {
+        await updateWorldDatabase(world);
+    };
 };
 
 // A ordem é importante e não deve ser alterada.
-function updateAllDatabases() {
-    AllyModel.updateDatabase()
-        .then(() => PlayerModel.updateDatabase())
-        .then(() => VillageModel.updateDatabase())
-        .then(() => ConquerModel.updateDatabase())
-        .then(() => setTimeout(() => updateAllDatabases(), 3600000 * 1.2))
-        .catch((err) => console.log(err));
+function updateWorldDatabase(world: string) {
+    return new Promise<void>((resolve, reject) => {
+        const AllyTable = tables.map.get(`ally_${world}`);
+        const PlayerTable = tables.map.get(`player_${world}`);
+        const VillageTable = tables.map.get(`village_${world}`);
+        const ConquerTable = tables.map.get(`conquer_${world}`);
+
+        AllyTable?.updateDatabase()
+            .then(() => PlayerTable?.updateDatabase())
+            .then(() => VillageTable?.updateDatabase())
+            .then(() => ConquerTable?.updateDatabase())
+            .then(() => resolve())
+            .then(() => setTimeout(() => updateWorldDatabase(world), 3600000 * 1.2))
+            .catch((err: unknown) => reject(err));
+    });
 };
 
-export async function* fetchData(type: AllWorldFileTypes) {
-    const worldURL: WorldURL = 'https://br116.tribalwars.com.br/';
+export async function* fetchData(world: string, type: AllWorldFileTypes) {
+    const worldURL: WorldURL = `https://br${world}.tribalwars.com.br/`;
     const dataURL: WorldDataURL = `${worldURL}map/${type}.txt`;
 
     const response = await fetch(dataURL);

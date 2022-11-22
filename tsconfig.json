@@ -38,7 +38,7 @@
         
     },
 
-    "files": ["index.d.ts"],
+    "files": ["index.d.ts", "config.json"],
     
     "include": ["./src/**/*"]
 }
