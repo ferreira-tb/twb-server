@@ -65,7 +65,7 @@ export function createVillageTable(world: string) {
     };
 };
 
-class ExtendedVillage implements Village {
+class VillageInfo implements Village {
     readonly village_id: number;
     readonly name: string;
     readonly x: number;
@@ -111,7 +111,7 @@ export async function getPlayerVillages(world: string, id: string) {
     if (!player) return null;
 
     const villages = await VillageTable.findAll({ where: { player_id: parsedID } });
-    const extendedVillages = villages.map((village) => new ExtendedVillage(village, player.name));
+    const extendedVillages = villages.map((village) => new VillageInfo(village, player.name));
     extendedVillages.sort((a, b) => a.name.localeCompare(b.name, 'pt-br'));
 
     return extendedVillages;

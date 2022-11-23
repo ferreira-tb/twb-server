@@ -66,3 +66,60 @@ export function createAllyTable(world: string) {
         };
     };
 };
+
+class AllyInfo implements Ally {
+    readonly ally_id: number;
+    readonly name: string;
+    readonly tag: string;
+    readonly member_amount: number;
+    readonly village_amount: number;
+    readonly points: number;
+    readonly all_points: number;
+    readonly rank: number;
+
+    readonly points_per_member: number;
+    readonly points_per_village: number;
+
+    constructor(ally: AllyModel) {
+        this.ally_id = ally.ally_id;
+        this.name = ally.name;
+        this.tag = ally.tag;
+        this.member_amount = ally.member_amount;
+        this.village_amount = ally.village_amount;
+        this.points = ally.points;
+        this.all_points = ally.all_points;
+        this.rank = ally.rank;
+
+        this.points_per_member = Math.round(this.all_points / this.member_amount);
+        this.points_per_village = Math.round(this.all_points / this.village_amount);
+    };
+};
+
+export async function getAllyInfo(world: string, id: string) {
+    const { tables } = await import('../db.js');
+    const AllyTable = tables.map.get(`ally_${world}`) as typeof AllyModel | undefined;
+    if (!AllyTable) return null;
+
+    const parsedID = Number.parseInt(id, 10);
+    if (Number.isNaN(parsedID)) return null;
+
+    const ally = await AllyTable.findByPk(parsedID);
+    if (!ally) return null;
+
+    return new AllyInfo(ally);
+};
+
+export async function getAllyRanking(world: string) {
+    const { tables } = await import('../db.js');
+    const AllyTable = tables.map.get(`ally_${world}`) as typeof AllyModel | undefined;
+    if (!AllyTable) return null;
+
+    const allies = await AllyTable.findAll();
+    if (allies.length === 0) return null;
+
+    allies.sort((a, b) => a.rank - b.rank);
+    while (allies.length > 100) allies.pop();
+
+    const extendedAllies = allies.map((ally) => new AllyInfo(ally));
+    return extendedAllies;
+};

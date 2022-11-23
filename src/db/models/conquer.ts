@@ -83,7 +83,7 @@ export function createConquerTable(world: string) {
     };
 };
 
-type ConquestRecordData = [
+type ConquerInfoData = [
     VillageModel | null | undefined,
     PlayerModel | null | undefined,
     PlayerModel | null | undefined,
@@ -91,7 +91,7 @@ type ConquestRecordData = [
     AllyModel | null | undefined
 ];
 
-export class ConquestRecord {
+export class ConquerInfo {
     readonly time: string;
     readonly village: string | null;
     readonly village_points: string;
@@ -101,7 +101,7 @@ export class ConquestRecord {
     readonly new_tribe: string | null;
     readonly raw: Conquer;
 
-    constructor(conquer: Conquer, data: ConquestRecordData) {
+    constructor(conquer: Conquer, data: ConquerInfoData) {
         const parseDate = () => {
             const date = new Date(conquer.time);
             const day = date.toLocaleDateString('pt-br');
@@ -113,9 +113,9 @@ export class ConquestRecord {
         this.village = data[0]?.name ?? null;
         this.village_points = conquer.points.toLocaleString('pt-br');
         this.new_owner = data[1]?.name ?? null;
-        this.old_owner = data[2]?.name ?? ConquestRecord.isItBarbarian(conquer.old_owner_id, 'player');
-        this.new_tribe = data[3]?.tag ?? ConquestRecord.isItBarbarian(conquer.old_owner_id, 'ally');
-        this.old_tribe = data[4]?.tag ?? ConquestRecord.isItBarbarian(conquer.old_owner_id, 'ally');
+        this.old_owner = data[2]?.name ?? ConquerInfo.isItBarbarian(conquer.old_owner_id, 'player');
+        this.new_tribe = data[3]?.tag ?? ConquerInfo.isItBarbarian(conquer.old_owner_id, 'ally');
+        this.old_tribe = data[4]?.tag ?? ConquerInfo.isItBarbarian(conquer.old_owner_id, 'ally');
         this.raw = conquer;
 
         for (const [key, value] of Object.entries(this)) {

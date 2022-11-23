@@ -63,7 +63,9 @@ export function createPlayerTable(world: string) {
 };
 
 class PlayerInfo {
+    readonly player_id: number;
     readonly player_name: string;
+    readonly ally_id: number | null;
     readonly ally_name: string | null;
     readonly ally_tag: string | null;
     readonly village_amount: number;
@@ -72,7 +74,9 @@ class PlayerInfo {
     readonly rank: number;
 
     constructor(player: PlayerModel, ally: AllyModel | null) {
+        this.player_id = player.player_id;
         this.player_name = player.name;
+        this.ally_id = ally?.ally_id ?? null;
         this.ally_name = ally?.name ?? null;
         this.ally_tag = ally?.tag ?? null;
         this.village_amount = player.village_amount;
@@ -103,4 +107,31 @@ export async function getPlayerInfo(world: string, id: string) {
     };
 
     return new PlayerInfo(player, await getAlly());
+};
+
+export async function getPlayerRanking(world: string) {
+    const { tables } = await import('../db.js');
+    const PlayerTable = tables.map.get(`player_${world}`) as typeof PlayerModel | undefined;
+    if (!PlayerTable) return null;
+
+    const players = await PlayerTable.findAll();
+    if (players.length === 0) return null;
+
+    players.sort((a, b) => a.rank - b.rank);
+    while (players.length > 50) players.pop();
+
+    const AllyTable = tables.map.get(`ally_${world}`) as typeof AllyModel | undefined;
+    const getAlly = async (ally_id: number) => {
+        if (!AllyTable || ally_id === 0) return null;
+        const ally = await AllyTable.findByPk(ally_id);
+        if (!ally) return null;
+
+        return ally;
+    };
+
+    const extendedPlayers = await Promise.all(players.map(async (player) => {
+        return new PlayerInfo(player, await getAlly(player.ally_id));
+    }));
+
+    return extendedPlayers;
 };

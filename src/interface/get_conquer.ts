@@ -1,4 +1,4 @@
-import { Conquer, ConquestRecord } from  '../db/models/conquer.js';
+import { Conquer, ConquerInfo } from  '../db/models/conquer.js';
 
 import type { AllyModel } from '../db/models/ally.js';
 import type { PlayerModel } from '../db/models/player.js';
@@ -18,7 +18,7 @@ export async function getConquer(world: string, minutes: number = 5) {
     const response = await fetch(interfaceURL);
     const rawText = await response.text();
 
-    const conquests: ConquestRecord[] = [];
+    const conquests: ConquerInfo[] = [];
     const lines = rawText.split(/\r?\n/);
     for (const rawLine of lines) {
         const line = rawLine.trim().split(',');
@@ -35,7 +35,7 @@ export async function getConquer(world: string, minutes: number = 5) {
                 AllyTable?.findByPk(conquer.old_tribe_id)
             ]);
 
-            const record = new ConquestRecord(conquer, data);
+            const record = new ConquerInfo(conquer, data);
             conquests.push(record);
 
         } catch (err) {
