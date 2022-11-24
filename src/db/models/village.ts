@@ -2,7 +2,7 @@ import { Model } from 'sequelize';
 import { sequelize, fetchData } from '../db.js';
 
 import type { InferAttributes, InferCreationAttributes } from 'sequelize';
-import type { PlayerModel } from './player';
+import type { PlayerModel } from './player.js';
 
 class Village {
     readonly village_id: number;
@@ -111,8 +111,8 @@ export async function getPlayerVillages(world: string, id: string) {
     if (!player) return null;
 
     const villages = await VillageTable.findAll({ where: { player_id: parsedID } });
-    const extendedVillages = villages.map((village) => new VillageInfo(village, player.name));
-    extendedVillages.sort((a, b) => a.name.localeCompare(b.name, 'pt-br'));
+    const playerVillages = villages.map((village) => new VillageInfo(village, player.name));
+    playerVillages.sort((a, b) => a.name.localeCompare(b.name, 'pt-br'));
 
-    return extendedVillages;
+    return playerVillages;
 };

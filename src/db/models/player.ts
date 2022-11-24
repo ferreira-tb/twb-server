@@ -62,7 +62,7 @@ export function createPlayerTable(world: string) {
     };
 };
 
-class PlayerInfo {
+export class PlayerInfo {
     readonly player_id: number;
     readonly player_name: string;
     readonly ally_id: number | null;

@@ -2,6 +2,7 @@ import { Model } from 'sequelize';
 import { sequelize, fetchData } from '../db.js';
 
 import type { InferAttributes, InferCreationAttributes } from 'sequelize';
+import { PlayerInfo, type PlayerModel } from './player.js';
 
 class Ally {
     readonly ally_id: number;
@@ -128,4 +129,25 @@ export async function getAllyRanking(world: string) {
 
     const extendedAllies = allies.map((ally) => new AllyInfo(ally));
     return extendedAllies;
+};
+
+export async function getAllyMembers(world: string, id: string) {
+    const { tables } = await import('../db.js');
+    const AllyTable = tables.map.get(`ally_${world}`) as typeof AllyModel | undefined;
+    const PlayerTable = tables.map.get(`player_${world}`) as typeof PlayerModel | undefined;
+    if (!AllyTable || !PlayerTable ) return null;
+
+    const parsedID = Number.parseInt(id, 10);
+    if (Number.isNaN(parsedID)) return null;
+
+    const ally = await AllyTable.findByPk(parsedID);
+    if (!ally) return null;
+
+    const players = await PlayerTable.findAll({ where: { ally_id: parsedID } });
+    if (players.length === 0) return null;
+
+    const allyMembers = players.map((player) => new PlayerInfo(player, ally));
+    allyMembers.sort((a, b) => b.points - a.points);
+
+    return allyMembers;
 };

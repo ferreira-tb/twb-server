@@ -89,6 +89,18 @@ app.get(`${allyQuery}/:id(\\d+)`, async (request, response) => {
     response.send(allyInfo);
 });
 
+app.get(`${allyQuery}/:id(\\d+)/members`, async (request, response) => {
+    const { id, world } = request.params;
+    if (!config.worlds.includes(world)) {
+        response.status(404).end();
+        return;
+    };
+
+    const { getAllyMembers } = await import('./db/models/ally.js');
+    const allyMembers = await getAllyMembers(world, id);
+    response.send(allyMembers);
+});
+
 ////// Tribal Wars ("/api/game/:world/").
 app.get('/api/game/:world/player/:id(\\d+)/profile', async (request, response) => {
     const { id, world } = request.params;
@@ -102,6 +114,19 @@ app.get('/api/game/:world/player/:id(\\d+)/profile', async (request, response) =
     response.send(targetPage);
 });
 
+app.get('/api/game/:world/ally/:id(\\d+)/profile', async (request, response) => {
+    const { id, world } = request.params;
+    if (!config.worlds.includes(world)) {
+        response.status(404).end();
+        return;
+    };
+
+    const { getAllyProfilePage } = await import('./game/profile.js');
+    const targetPage = await getAllyProfilePage(world, id);
+    response.send(targetPage);
+});
+
+// Conecta à porta.
 const port = process.env.PORT ?? 3000;
 app.listen(port, () => console.log(`Conectado à porta ${port}.`));
 
