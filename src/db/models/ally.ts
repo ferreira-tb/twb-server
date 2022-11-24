@@ -90,8 +90,14 @@ class AllyInfo implements Ally {
         this.all_points = ally.all_points;
         this.rank = ally.rank;
 
-        this.points_per_member = Math.round(this.all_points / this.member_amount);
-        this.points_per_village = Math.round(this.all_points / this.village_amount);
+        // Se o denominador for igual a zero, o resultado não será finito.
+        // Não é possível serializar números não-finitos, como NaN ou Infinity.
+        // Caso tente, será obtido null, o que pode gerar erros no cliente.
+        const pointsPerMember = Math.round(this.all_points / this.member_amount);
+        this.points_per_member = Number.isFinite(pointsPerMember) ? pointsPerMember : 0;
+
+        const pointsPerVillage = Math.round(this.all_points / this.village_amount);
+        this.points_per_village = Number.isFinite(pointsPerVillage) ? pointsPerVillage : 0;
     };
 };
 

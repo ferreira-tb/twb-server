@@ -17,8 +17,11 @@ export class Conquer {
 
     constructor(data: string[]) {
         this.village_id = Number.parseInt(data[0], 10);
+        
         // Unix Timestamp (em segundos).
-        this.time = Number.parseInt(data[1], 10) * 1000;
+        const timestamp = Number.parseInt(data[1], 10);
+        this.time = timestamp * 1000;
+
         this.new_owner_id = Number.parseInt(data[2], 10);
         this.old_owner_id = Number.parseInt(data[3], 10);
         this.old_tribe_id = Number.parseInt(data[4], 10);
@@ -53,15 +56,13 @@ export function createConquerTable(world: string) {
                 // Verifica as outras informações para ter certeza que se trata da mesma conquista.
                 if (conquerQuery) {
                     for (const [key, value] of Object.entries(conquer)) {
-                        if (key === 'points') continue;
-
                         if (conquerQuery[key as keyof Conquer] !== value) {
+                            if (key === 'points') continue;
                             conquerQuery = null;
                             break;
                         };
                     };
                 };
-
 
                 if (conquerQuery === null) conquests.push(conquer);
             };

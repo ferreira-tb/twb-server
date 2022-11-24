@@ -81,8 +81,13 @@ class PlayerInfo {
         this.ally_tag = ally?.tag ?? null;
         this.village_amount = player.village_amount;
         this.points = player.points;
-        this.mean_points = Math.round(this.points / this.village_amount);
         this.rank = player.rank;
+
+        // Se o denominador for igual a zero, o resultado não será finito.
+        // Não é possível serializar números não-finitos, como NaN ou Infinity.
+        // Caso tente, será obtido null, o que pode gerar erros no cliente.
+        const meanPoints = Math.round(this.points / this.village_amount);
+        this.mean_points = Number.isFinite(meanPoints) ? meanPoints : 0;
     };
 };
 

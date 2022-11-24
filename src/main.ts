@@ -77,6 +77,18 @@ app.get(allyQuery, async (request, response) => {
     response.send(allyRanking);
 });
 
+app.get(`${allyQuery}/:id(\\d+)`, async (request, response) => {
+    const { id, world } = request.params;
+    if (!config.worlds.includes(world)) {
+        response.status(404).end();
+        return;
+    };
+
+    const { getAllyInfo } = await import('./db/models/ally.js');
+    const allyInfo = await getAllyInfo(world, id);
+    response.send(allyInfo);
+});
+
 ////// Tribal Wars ("/api/game/:world/").
 app.get('/api/game/:world/player/:id(\\d+)/profile', async (request, response) => {
     const { id, world } = request.params;
@@ -93,4 +105,5 @@ app.get('/api/game/:world/player/:id(\\d+)/profile', async (request, response) =
 const port = process.env.PORT ?? 3000;
 app.listen(port, () => console.log(`Conectado à porta ${port}.`));
 
+// Atualiza o banco de dados.
 updateAllDatabases();
