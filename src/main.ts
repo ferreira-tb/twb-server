@@ -2,7 +2,7 @@ import config from '../config.json' assert { type: 'json' };
 import express from 'express';
 import { updateAllDatabases } from './db/db.js';
 
-export const app = express();
+const app = express();
 
 app.get('/api', (_request, response) => response.send('Conectado!'));
 

@@ -126,7 +126,7 @@ export class ConquerInfo {
     };
 
     public static isItBarbarian(id: number, type: 'ally' | 'player') {
-        if (id === 0 && type === 'player') return 'Bárbaros';
+        if (id === 0 && type === 'player') return '—';
         return null;
     };
 };
