@@ -5,14 +5,15 @@ import type { InferAttributes, InferCreationAttributes } from 'sequelize';
 import type { AllyModel } from './ally.js';
 import type { PlayerModel } from './player.js';
 import type { VillageModel } from './village.js';
+import type { TableMap } from '../../../index';
 
 export class Conquer {
     readonly village_id: number;
     readonly time: number;
     readonly new_owner_id: number;
     readonly old_owner_id: number;
-    readonly old_tribe_id: number;
     readonly new_tribe_id: number;
+    readonly old_tribe_id: number;
     readonly points: number;
 
     constructor(data: string[]) {
@@ -37,8 +38,8 @@ export declare class ConquerModel extends Model {
     readonly time: number;
     readonly new_owner_id: number;
     readonly old_owner_id: number;
-    readonly old_tribe_id: number;
     readonly new_tribe_id: number;
+    readonly old_tribe_id: number;
     readonly points: number;
 };
 
@@ -84,50 +85,123 @@ export function createConquerTable(world: string) {
     };
 };
 
-type ConquerInfoData = [
-    VillageModel | null | undefined,
-    PlayerModel | null | undefined,
-    PlayerModel | null | undefined,
-    AllyModel | null | undefined,
-    AllyModel | null | undefined
-];
+interface ConquerInfoData {
+    readonly village: string | null;
+    readonly new_owner: string;
+    readonly old_owner: string | null;
+    readonly new_tribe: string | null;
+    readonly old_tribe: string | null;
+}
 
 export class ConquerInfo {
     readonly time: string;
     readonly village: string | null;
     readonly village_points: string;
-    readonly new_owner: string | null;
-    readonly old_owner: string | null;
-    readonly old_tribe: string | null;
+    readonly new_owner: string;
+    readonly old_owner: string;
     readonly new_tribe: string | null;
+    readonly old_tribe: string | null;
     readonly raw: Conquer;
 
     constructor(conquer: Conquer, data: ConquerInfoData) {
-        const parseDate = () => {
-            const date = new Date(conquer.time);
-            const day = date.toLocaleDateString('pt-br');
-            const hour = date.toLocaleTimeString('pt-br');
-            return `${day} ${hour}`;
-        };
-
-        this.time = parseDate();
-        this.village = data[0]?.name ?? null;
+        this.time = ConquerInfo.parseDate(conquer.time);
+        this.village = data.village;
         this.village_points = conquer.points.toLocaleString('pt-br');
-        this.new_owner = data[1]?.name ?? null;
-        this.old_owner = data[2]?.name ?? ConquerInfo.isItBarbarian(conquer.old_owner_id, 'player');
-        this.new_tribe = data[3]?.tag ?? ConquerInfo.isItBarbarian(conquer.old_owner_id, 'ally');
-        this.old_tribe = data[4]?.tag ?? ConquerInfo.isItBarbarian(conquer.old_owner_id, 'ally');
         this.raw = conquer;
 
-        for (const [key, value] of Object.entries(this)) {
-            if (value === null && key !== 'old_tribe' && key !== 'new_tribe') {
-                throw new Error('Dados inválidos.');
-            };
-        };
+        this.new_owner = data.new_owner;
+        this.old_owner = data.old_owner ?? '—';
+        this.new_tribe = data.new_tribe;
+        this.old_tribe = data.old_tribe;  
     };
 
-    public static isItBarbarian(id: number, type: 'ally' | 'player') {
-        if (id === 0 && type === 'player') return '—';
-        return null;
+    public static parseDate(time: number) {
+        const date = new Date(time);
+        const day = date.toLocaleDateString('pt-br');
+        const hour = date.toLocaleTimeString('pt-br');
+        return `${day} às ${hour}`;
     };
+};
+
+interface ParseConquerModelOptions {
+    tableMap?: TableMap;
+    village?: VillageModel | null;
+}
+
+/**
+ * Transforma uma instância de `ConquerModel` em uma de `ConquerInfo`.
+ * @param world Mundo.
+ * @param conquer Instância de `ConquerModel`.
+ */
+async function parseConquerModel(world: string, conquer: ConquerModel, options?: ParseConquerModelOptions) {
+    let tableMap = options?.tableMap;
+    if (!tableMap) {
+        const { tables } = await import('../db.js');
+        tableMap = tables.map;
+    };
+
+    const AllyTable = tableMap.get(`ally_${world}`) as typeof AllyModel | undefined;
+    const PlayerTable = tableMap.get(`player_${world}`) as typeof PlayerModel | undefined;
+    const VillageTable = tableMap.get(`village_${world}`) as typeof VillageModel | undefined;
+
+    if (!AllyTable || !PlayerTable || !VillageTable ) return null;
+
+    const village = options?.village ?? await VillageTable.findByPk(conquer.village_id);
+    if (!village) return null;
+
+    const getAlly = async (allyID: number) => {
+        if (allyID === 0) return null;
+        const ally = await AllyTable.findByPk(allyID);
+        if (!ally) return null;
+
+        return ally;
+    };
+
+    const [oldOwner, newOwner, oldAlly, newAlly] = await Promise.all([
+        PlayerTable.findByPk(conquer.old_owner_id),
+        PlayerTable.findByPk(conquer.new_owner_id),
+        getAlly(conquer.old_tribe_id),
+        getAlly(conquer.new_tribe_id)
+    ]);
+
+    if (!newOwner) return null;
+
+    const data: ConquerInfoData = {
+        village: village.name,
+        new_owner: newOwner.name,
+        old_owner: oldOwner?.name ?? null,
+        new_tribe: newAlly?.name ?? null,
+        old_tribe: oldAlly?.name ?? null
+    };
+
+    return new ConquerInfo(conquer, data);
+};
+
+/**
+ * Retorna uma array contendo o histórico de conquistas da aldeia indicada.
+ * @param world Mundo.
+ * @param id ID da aldeia.
+ */
+export async function getVillageConquestHistory(world: string, id: string) {
+    const { tables } = await import('../db.js');
+    const ConquerTable = tables.map.get(`conquer_${world}`) as typeof ConquerModel | undefined;
+    const VillageTable = tables.map.get(`village_${world}`) as typeof VillageModel | undefined;
+    if (!ConquerTable || !VillageTable) return null;
+
+    const parsedID = Number.parseInt(id, 10);
+    if (Number.isNaN(parsedID)) return null;
+
+    const village = await VillageTable.findByPk(parsedID);
+    if (!village) return null;
+
+    const rawConquests = await ConquerTable.findAll({ where: { village_id: parsedID } });
+    if (rawConquests.length === 0) return null;
+    if (rawConquests.length > 1) rawConquests.sort((a, b) => b.time - a.time);
+
+    const conquests = await Promise.all(rawConquests.map(async (conquer) => {
+        const options = { tableMap: tables.map, village: village }
+        return await parseConquerModel(world, conquer, options);
+    }));
+    
+    return conquests;
 };

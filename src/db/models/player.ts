@@ -2,7 +2,7 @@ import { Model } from 'sequelize';
 import { sequelize, fetchData } from '../db.js';
 
 import type { InferAttributes, InferCreationAttributes } from 'sequelize';
-import type { AllyModel } from './ally';
+import type { AllyModel } from './ally.js';
 
 class Player {
     readonly player_id: number;

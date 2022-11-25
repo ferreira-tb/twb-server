@@ -1,3 +1,8 @@
+import type { AllyModel } from "./src/db/models/ally";
+import type { ConquerModel } from "./src/db/models/conquer";
+import type { PlayerModel } from "./src/db/models/player";
+import type { VillageModel } from "./src/db/models/village";
+
 type WorldURL = `https://br${string}.tribalwars.com.br/`;
 
 type WorldDataType = 'village' | 'ally' | 'player' | 'conquer' | 'conquer_extended';
@@ -23,3 +28,11 @@ type WorldInterface =
     | 'interface.php?func=get_building_info';
 
 type WorldInterfaceURL = `${WorldURL}${WorldInterface}`;
+
+type DBModel =
+    | typeof AllyModel
+    | typeof ConquerModel
+    | typeof PlayerModel
+    | typeof VillageModel;
+    
+type TableMap = Map<`${WorldDataType}_${string}`, DBModel>;

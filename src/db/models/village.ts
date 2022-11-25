@@ -2,6 +2,7 @@ import { Model } from 'sequelize';
 import { sequelize, fetchData } from '../db.js';
 
 import type { InferAttributes, InferCreationAttributes } from 'sequelize';
+import type { AllyModel } from './ally.js';
 import type { PlayerModel } from './player.js';
 
 class Village {
@@ -71,13 +72,13 @@ class VillageInfo implements Village {
     readonly x: number;
     readonly y: number;
     readonly coords: string;
-    continent!: string;
     readonly player_id: number;
-    readonly player_name: string;
+    readonly player_name: string | null;
     readonly points: number;
     readonly type: number;
+    continent!: string;
 
-    constructor(village: VillageModel, player_name: string) {
+    constructor(village: VillageModel, player_name: string | null) {
         this.village_id = village.village_id;
         this.name = village.name;
         this.x = village.x;
@@ -98,6 +99,11 @@ class VillageInfo implements Village {
     };
 };
 
+/**
+ * Retorna uma array contendo informações sobre as aldeias do jogador.
+ * @param world Mundo.
+ * @param id ID do jogador.
+ */
 export async function getPlayerVillages(world: string, id: string) {
     const { tables } = await import('../db.js');
     const VillageTable = tables.map.get(`village_${world}`) as typeof VillageModel | undefined;
@@ -115,4 +121,53 @@ export async function getPlayerVillages(world: string, id: string) {
     playerVillages.sort((a, b) => a.name.localeCompare(b.name, 'pt-br'));
 
     return playerVillages;
+};
+
+type AllyDetails = [number, string] | null;
+
+class ExtendedVillageInfo extends VillageInfo {
+    readonly ally_id: number | null;
+    readonly ally_name: string | null;
+
+    constructor(village: VillageModel, player: string | null, ally: AllyDetails) {
+        super(village, player);
+
+        this.ally_id = ally ? ally[0] : null;
+        this.ally_name = ally ? ally[1] : null;
+    };
+};
+
+/**
+ * Obtém informações sobre a aldeia, incluindo dados sobre a tribo (se houver).
+ * @param world Mundo.
+ * @param id ID da aldeia.
+ */
+export async function getVillageInfo(world: string, id: string) {
+    const { tables } = await import('../db.js');
+    const PlayerTable = tables.map.get(`player_${world}`) as typeof PlayerModel | undefined;
+    const VillageTable = tables.map.get(`village_${world}`) as typeof VillageModel | undefined;
+    
+    if (!PlayerTable || !VillageTable ) return null;
+
+    const parsedID = Number.parseInt(id, 10);
+    if (Number.isNaN(parsedID)) return null;
+
+    const village = await VillageTable.findByPk(parsedID);
+    if (!village) return null;
+
+    const player = await PlayerTable.findByPk(village.player_id);
+    const playerName = player?.name ?? null;
+
+    /** A função precisa retornar `null` para `ally_id === 0` e `ally_id === undefined`. */
+    const getAllyNameAndID = async (ally_id: number | undefined) => {
+        const AllyTable = tables.map.get(`ally_${world}`) as typeof AllyModel | undefined;
+        if (!AllyTable || !ally_id) return null;
+        const ally = await AllyTable.findByPk(ally_id);
+        if (!ally) return null;
+
+        return [ally.ally_id, ally.name] as [number, string];
+    };
+
+    const allyNameAndID = await getAllyNameAndID(player?.ally_id);
+    return new ExtendedVillageInfo(village, playerName, allyNameAndID);
 };

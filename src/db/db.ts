@@ -1,6 +1,7 @@
 import config from '../../config.json' assert { type: 'json' };
 import { Sequelize } from 'sequelize';
 import { initTables } from './tables.js';
+import type { AllWorldFileTypes, WorldURL, WorldDataURL } from '../../index';
 
 export const sequelize = new Sequelize({
     dialect: 'sqlite',

@@ -12,10 +12,13 @@ app.get('/api/worlds', (_request, response) => response.send(config.worlds));
 ////// Interface ("/api/interface/:world/").
 app.get('/api/interface/:world/get_conquer', async (request, response) => {
     const world = request.params.world;
-    if (!config.worlds.includes(world)) return;
+    if (!config.worlds.includes(world)) {
+        response.status(404).end();
+        return;
+    };
 
-    const { getConquer } = await import('./interface/get_conquer.js');
-    const conquests = await getConquer(world, 60);
+    const { getConquestsFromInterface } = await import('./interface/get_conquer.js');
+    const conquests = await getConquestsFromInterface(world, 60);
 
     if (Array.isArray(conquests) && conquests.length > 1) {
         conquests.sort((a, b) => b.raw.time - a.raw.time);
@@ -25,6 +28,32 @@ app.get('/api/interface/:world/get_conquer', async (request, response) => {
 });
 
 ////// Banco de dados ("/api/query/:world/").
+// Aldeias
+const villageQuery = '/api/query/:world/village';
+app.get(`${villageQuery}/:id(\\d+)`, async (request, response) => {
+    const { id, world } = request.params;
+    if (!config.worlds.includes(world)) {
+        response.status(404).end();
+        return;
+    };
+
+    const { getVillageInfo } = await import('./db/models/village.js');
+    const villageInfo = await getVillageInfo(world, id);
+    response.send(villageInfo);
+});
+
+app.get(`${villageQuery}/:id(\\d+)/conquests`, async (request, response) => {
+    const { id, world } = request.params;
+    if (!config.worlds.includes(world)) {
+        response.status(404).end();
+        return;
+    };
+
+    const { getVillageConquestHistory } = await import('./db/models/conquer.js');
+    const conquestHistory = await getVillageConquestHistory(world, id);
+    response.send(conquestHistory);
+});
+
 // Jogadores
 const playerQuery = '/api/query/:world/player';
 app.get(playerQuery, async (request, response) => {

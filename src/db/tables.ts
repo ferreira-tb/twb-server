@@ -1,3 +1,4 @@
+import type { TableMap } from '../../index';
 import config from '../../config.json' assert { type: 'json' };
 import * as attributes from './attributes.js';
 import { sequelize } from './db.js';
@@ -6,14 +7,8 @@ import { createConquerTable, type ConquerModel } from './models/conquer.js';
 import { createPlayerTable, type PlayerModel } from './models/player.js';
 import { createVillageTable, type VillageModel } from './models/village.js';
 
-export type DBModel =
-    | typeof AllyModel
-    | typeof ConquerModel
-    | typeof PlayerModel
-    | typeof VillageModel;
-
 export async function initTables() {
-    const tableMap: Map<`${WorldDataType}_${string}`, DBModel> = new Map();
+    const tableMap: TableMap = new Map();
 
     for (const world of config.worlds) {
         const newName = (old: string) => `${old}${world.toUpperCase()}`;
