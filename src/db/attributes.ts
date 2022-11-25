@@ -37,6 +37,11 @@ export const ally = {
     rank: {
         type: DataTypes.INTEGER,
         allowNull: false
+    },
+    active: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: true
     }
 } as const;
 
@@ -110,6 +115,11 @@ export const player = {
     rank: {
         type: DataTypes.INTEGER,
         allowNull: false
+    },
+    active: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: true
     }
 } as const;
 
@@ -145,5 +155,10 @@ export const village = {
         type: DataTypes.INTEGER,
         allowNull: false,
         defaultValue: 0
+    },
+    active: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: true
     }
 } as const;

@@ -13,7 +13,7 @@ export const tables = { map: await initTables() };
 
 export async function updateAllDatabases() {
     // Presente apenas para impedir que o banco de dados atualize.
-    if (config.worlds.includes('116')) return;
+    // if (config.worlds.includes('116')) return;
     
     for (const world of config.worlds) {
         await updateWorldDatabase(world);

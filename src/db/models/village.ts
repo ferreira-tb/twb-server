@@ -13,6 +13,7 @@ class Village {
     readonly player_id: number;
     readonly points: number;
     readonly type: number;
+    readonly active: boolean = true;
 
     constructor(data: string[]) {
         this.village_id = Number.parseInt(data[0], 10);
@@ -35,6 +36,7 @@ export declare class VillageModel extends Model {
     readonly player_id: number;
     readonly points: number;
     readonly type: number;
+    readonly active: boolean;
 };
 
 export function createVillageTable(world: string) {
@@ -49,9 +51,9 @@ export function createVillageTable(world: string) {
             };
     
             if (villages.length > 0) {
+                const keys = ['name', 'player_id', 'points'] as (keyof Village)[];
                 const transaction = await sequelize.transaction();
                 try {
-                    const keys = Object.keys(villages[0]) as (keyof Village)[];
                     await this.bulkCreate(villages, { updateOnDuplicate: keys, transaction: transaction });
                     await transaction.commit();
                 } catch (err) {
@@ -76,7 +78,8 @@ class VillageInfo implements Village {
     readonly player_name: string | null;
     readonly points: number;
     readonly type: number;
-    continent!: string;
+    readonly active: boolean;
+    readonly continent!: string;
 
     constructor(village: VillageModel, player_name: string | null) {
         this.village_id = village.village_id;
@@ -87,11 +90,12 @@ class VillageInfo implements Village {
         this.player_name = player_name;
         this.points = village.points;
         this.type = village.type;
+        this.active = village.active;
 
         const getCoords = () => {
             const x = this.x.toString(10).padStart(3, '0');
             const y = this.y.toString(10).padStart(3, '0');
-            this.continent = `K${y[0]}${x[0]}`;
+            Reflect.set(this, 'continent', `K${y[0]}${x[0]}`);
             return `${x}|${y}`;
         };
 

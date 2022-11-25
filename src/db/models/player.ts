@@ -11,6 +11,7 @@ class Player {
     readonly village_amount: number;
     readonly points: number;
     readonly rank: number;
+    readonly active: boolean = true;
 
     constructor(data: string[]) {
         this.player_id = Number.parseInt(data[0], 10);
@@ -31,6 +32,7 @@ export declare class PlayerModel extends Model {
     readonly village_amount: number;
     readonly points: number;
     readonly rank: number;
+    readonly active: boolean;
 };
 
 export function createPlayerTable(world: string) {
@@ -45,15 +47,15 @@ export function createPlayerTable(world: string) {
             };
     
             if (players.length > 0) {
+                const keys = ['name', 'ally_id', 'village_amount', 'points', 'rank'] as (keyof Player)[];
                 const transaction = await sequelize.transaction();
-                try {
-                    const keys = Object.keys(players[0]) as (keyof Player)[];
+                try {   
                     await this.bulkCreate(players, { updateOnDuplicate: keys , transaction: transaction });
                     await transaction.commit();
                 } catch (err) {
                     transaction.rollback();
                     if (err instanceof Error) throw err;
-                };  
+                };
             };
     
             const date = new Date().toLocaleTimeString('pt-br');
@@ -72,6 +74,7 @@ export class PlayerInfo {
     readonly points: number;
     readonly mean_points: number;
     readonly rank: number;
+    readonly active: boolean;
 
     constructor(player: PlayerModel, ally: AllyModel | null) {
         this.player_id = player.player_id;
@@ -82,6 +85,7 @@ export class PlayerInfo {
         this.village_amount = player.village_amount;
         this.points = player.points;
         this.rank = player.rank;
+        this.active = player.active;
 
         // Se o denominador for igual a zero, o resultado não será finito.
         // Não é possível serializar números não-finitos, como NaN ou Infinity.

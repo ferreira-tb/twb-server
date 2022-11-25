@@ -13,6 +13,7 @@ class Ally {
     readonly points: number;
     readonly all_points: number;
     readonly rank: number;
+    readonly active: boolean = true;
 
     constructor(data: string[]) {
         this.ally_id = Number.parseInt(data[0], 10);
@@ -37,6 +38,7 @@ export declare class AllyModel extends Model {
     readonly points: number;
     readonly all_points: number;
     readonly rank: number;
+    readonly active: boolean;
 };
 
 export function createAllyTable(world: string) {
@@ -51,15 +53,15 @@ export function createAllyTable(world: string) {
             };
     
             if (allies.length > 0) {
+                const keys = ['name', 'tag', 'member_amount', 'village_amount', 'points', 'all_points', 'rank'] as (keyof Ally)[];
                 const transaction = await sequelize.transaction();
                 try {
-                    const keys = Object.keys(allies[0]) as (keyof Ally)[];
                     await this.bulkCreate(allies, { updateOnDuplicate: keys, transaction: transaction });
                     await transaction.commit();
                 } catch (err) {
                     transaction.rollback();
                     if (err instanceof Error) throw err;
-                };  
+                };
             };
     
             const date = new Date().toLocaleTimeString('pt-br');
@@ -77,6 +79,7 @@ class AllyInfo implements Ally {
     readonly points: number;
     readonly all_points: number;
     readonly rank: number;
+    readonly active: boolean;
 
     readonly points_per_member: number;
     readonly points_per_village: number;
@@ -90,6 +93,7 @@ class AllyInfo implements Ally {
         this.points = ally.points;
         this.all_points = ally.all_points;
         this.rank = ally.rank;
+        this.active = ally.active;
 
         // Se o denominador for igual a zero, o resultado não será finito.
         // Não é possível serializar números não-finitos, como NaN ou Infinity.
